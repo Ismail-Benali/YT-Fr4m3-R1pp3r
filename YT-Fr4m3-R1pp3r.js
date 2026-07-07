@@ -24,7 +24,7 @@
 // @description:de  Hochpräziser YouTube-Frame-Extraktor für Videoanalyse, digitale Forensik und Medienuntersuchung.
 //
 // @namespace    http://tampermonkey.net/
-// @version      6.3
+// @version      5.0
 // @author       H3l!0s_T3k
 // @homepageURL  https://github.com/Ismail-Benali
 // @match        *://*.youtube.com/*
@@ -44,8 +44,8 @@
     function saveSettings() { try { localStorage.setItem('ripperSettings', JSON.stringify(settings)); } catch(e){} }
 
     let captureState = 'idle', captureCallbackId = null, fallbackInterval = null, lastCaptureTime = -1;
-    let pendingBlobs = 0, lastFrameTime = 0, currentFps = 0, lastHash = 0, skippedFrames = 0, captureStartTime = null;
-    let zip = null, framesFolder = null, canvas, ctx, dupCanvas, dupCtx;
+    let pendingBlobs = 0, lastFrameTime = 0, currentFps = 0, captureStartTime = null;
+    let zip = null, framesFolder = null, canvas, ctx;
 
     const SHEET_IMGS = 1024, SHEET_COLS = 32, SHEET_ROWS = 32, THUMB_W = 192, THUMB_H = 108;
     let currentSheetCanvas, currentSheetCtx, sheetIndex = 0, imgInSheet = 0, sheetX = 0, sheetY = 0, sheetBlobs = [];
@@ -60,8 +60,6 @@
     function formatTime(s) { if(isNaN(s)) return "00:00:00"; return `${Math.floor(s/3600).toString().padStart(2,'0')}:${Math.floor((s%3600)/60).toString().padStart(2,'0')}:${Math.floor(s%60).toString().padStart(2,'0')}`; }
     function formatDurationForName(s) { if(isNaN(s)) return "000000"; return `${Math.floor(s/3600).toString().padStart(2,'0')}${Math.floor((s%3600)/60).toString().padStart(2,'0')}${Math.floor(s%60).toString().padStart(2,'0')}`; }
 
-    function fnv1aHash(data) { let hash=0x811c9dc5; for(let i=0;i<data.length;i+=4){hash^=data[i]+data[i+1]+data[i+2];hash=Math.imul(hash,0x01000193);} return hash>>>0; }
-
     function updateUIState() {
         if(!startBtn) return;
         startBtn.style.display = captureState === 'idle' ? 'block' : 'none';
@@ -75,7 +73,7 @@
         if(!video || !statsTxt) return;
         const res=`${video.videoWidth}x${video.videoHeight}`, timeStr=`${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
         if(video.duration>0 && captureProgressBar){ const p=Math.min(((video.currentTime/video.duration)*100),100).toFixed(1); captureProgressBar.style.width=`${p}%`; captureProgressBar.style.background=p>80?'#d00':'#0f0'; }
-        statsTxt.innerText=`Res: ${res} | FPS: ${currentFps}\n${timeStr} | Captured: ${frameCount} (Dup: ${skippedFrames})\nCache: ${formatBytes(totalBytes)} / ${settings.maxRamMB} MB`;
+        statsTxt.innerText=`Res: ${res} | FPS: ${currentFps}\n${timeStr} | Captured: ${frameCount}\nCache: ${formatBytes(totalBytes)} / ${settings.maxRamMB} MB`;
     }
 
     function initSheetCanvas() { currentSheetCanvas=document.createElement('canvas'); currentSheetCanvas.width=SHEET_COLS*THUMB_W; currentSheetCanvas.height=SHEET_ROWS*THUMB_H; currentSheetCtx=currentSheetCanvas.getContext('2d'); currentSheetCtx.fillStyle='#000'; currentSheetCtx.fillRect(0,0,currentSheetCanvas.width,currentSheetCanvas.height); sheetX=0;sheetY=0;imgInSheet=0; }
@@ -84,19 +82,33 @@
 
     function captureFrame(video, now) {
         try {
-            if(!canvas){canvas=document.createElement('canvas');ctx=canvas.getContext('2d');dupCanvas=document.createElement('canvas');dupCtx=dupCanvas.getContext('2d');dupCanvas.width=10;dupCanvas.height=10;}
-            canvas.width=video.videoWidth;canvas.height=video.videoHeight;ctx.drawImage(video,0,0,canvas.width,canvas.height);
+            if(!canvas){ canvas=document.createElement('canvas'); ctx=canvas.getContext('2d'); }
+            canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+            ctx.drawImage(video,0,0,canvas.width,canvas.height);
+
             if(lastFrameTime>0&&now>0){const d=(now-lastFrameTime)/1000;if(d>0){fpsHistory.push(d);if(fpsHistory.length>20)fpsHistory.shift();currentFps=Math.round(1/(fpsHistory.reduce((a,b)=>a+b,0)/fpsHistory.length));}}
             lastFrameTime=now;
-            const cH=fnv1aHash(dupCtx.getImageData(0,0,10,10).data);if(cH===lastHash){skippedFrames++;return;} lastHash=cH;
+
             if(totalBytes>=(settings.maxRamMB*1024*1024)){if(statusTxt)statusTxt.innerText='[ WARN: RAM Limit ]';downloadZip();return;}
+
             pendingBlobs++;
-            canvas.toBlob((fB)=>{if(fB&&captureState==='running'){const ext=getExt(),tS=video.currentTime.toFixed(3).padStart(7,'0'),dS=formatDurationForName(video.duration),fS=frameCount.toString().padStart(6,'0'),fN=`${fS}_${dS}_${tS}.${ext}`;framesFolder.file(fN,fB);framesData.push({frame:fN,time:tS,size_bytes:fB.size});totalBytes+=fB.size;frameCount++;if(statusTxt)statusTxt.innerText=`[ Ripping... ${frameCount} ]`;}pendingBlobs--;},settings.format,settings.quality);
+            canvas.toBlob((fB)=>{
+                if(fB&&captureState==='running'){
+                    const ext=getExt(),tS=video.currentTime.toFixed(3).padStart(7,'0'),dS=formatDurationForName(video.duration),fS=frameCount.toString().padStart(6,'0'),fN=`${fS}_${dS}_${tS}.${ext}`;
+                    framesFolder.file(fN,fB);
+                    framesData.push({frame:fN,time:tS,size_bytes:fB.size});
+                    totalBytes+=fB.size; frameCount++;
+                    if(statusTxt)statusTxt.innerText=`[ Ripping... ${frameCount} ]`;
+                }
+                pendingBlobs--;
+            },settings.format,settings.quality);
+
             drawToContactSheet();
-        } catch(e){console.error("Capture Error:",e);if(statusTxt)statusTxt.innerText='[ ERROR: CORS ]';setCaptureState('idle');}
+        } catch(e){ console.error("Capture Error:",e); if(statusTxt)statusTxt.innerText='[ ERROR: CORS ]'; setCaptureState('idle'); }
     }
 
     function processVideoFrame(now) { if(captureState!=='running')return; const v=getVideo();if(!v)return; updateStats(v); if(v.currentTime-lastCaptureTime>=settings.interval||lastCaptureTime===-1){lastCaptureTime=v.currentTime;if(!v.paused&&!v.ended)captureFrame(v,now);} captureCallbackId=v.requestVideoFrameCallback(processVideoFrame); }
+
     let lastTime=0;
     function fallbackLoop() { if(captureState!=='running')return; const v=getVideo();if(!v)return; const now=performance.now();updateStats(v); if(now-lastTime>=(settings.interval*1000)){lastTime=now;if(!v.paused&&!v.ended&&(v.currentTime-lastCaptureTime>=settings.interval||lastCaptureTime===-1)){lastCaptureTime=v.currentTime;captureFrame(v,now);}} }
 
@@ -114,7 +126,7 @@
     function startCapture() {
         if(!isZipAvailable) return alert("Error: JSZip is blocked! Disable AdBlock/VPN.");
         const v=getVideo();if(!v)return alert("Video not found!");if(v.readyState<2)return alert("Video not loaded yet.");
-        zip=new JSZip();framesFolder=zip.folder("Frames");framesData=[];sheetBlobs=[];sheetIndex=1;frameCount=0;totalBytes=0;lastCaptureTime=-1;pendingBlobs=0;lastFrameTime=0;currentFps=0;lastHash=0;skippedFrames=0;fpsHistory.length=0;captureStartTime=new Date();
+        zip=new JSZip();framesFolder=zip.folder("Frames");framesData=[];sheetBlobs=[];sheetIndex=1;frameCount=0;totalBytes=0;lastCaptureTime=-1;pendingBlobs=0;lastFrameTime=0;currentFps=0;fpsHistory.length=0;captureStartTime=new Date();
         initSheetCanvas();v.addEventListener('error',vidErrorHandler);v.addEventListener('abort',vidErrorHandler);v.addEventListener('stalled',vidStalledHandler);setCaptureState('running');
     }
 
@@ -122,7 +134,7 @@
     function captureSingleFrame() {
         if(!isZipAvailable) return alert("Error: JSZip is blocked!");
         const v=getVideo();if(!v||v.readyState<2)return alert("Video not ready.");
-        if(!zip){zip=new JSZip();framesFolder=zip.folder("Frames");framesData=[];sheetBlobs=[];sheetIndex=1;initSheetCanvas();lastHash=0;if(!captureStartTime)captureStartTime=new Date();v.addEventListener('error',vidErrorHandler);v.addEventListener('abort',vidErrorHandler);}
+        if(!zip){zip=new JSZip();framesFolder=zip.folder("Frames");framesData=[];sheetBlobs=[];sheetIndex=1;initSheetCanvas();if(!captureStartTime)captureStartTime=new Date();v.addEventListener('error',vidErrorHandler);v.addEventListener('abort',vidErrorHandler);}
         captureFrame(v,performance.now());if(statusTxt)statusTxt.innerText=`[ Manual: ${frameCount} ]`;
     }
 
@@ -132,9 +144,9 @@
         if(frameCount===0&&captureState==='idle'){if(statusTxt)statusTxt.innerText='[ No Frames ]';return;}
         if(statusTxt)statusTxt.innerText='[ Finalizing... ]';setCaptureState('idle');await waitForPendingBlobs();if(imgInSheet>0)await saveCurrentSheet();
         if(statusTxt)statusTxt.innerText='[ Structuring... ]';const v=getVideo(),ext=getExt(),rF=zip.folder("Reports"),sF=zip.folder("ContactSheets");
-        zip.file("manifest.json",JSON.stringify({"tool":"YT Fr4m3 R1pp3r","version":"6.3","author":"H3l!0s_T3k","browser":navigator.userAgent,"date":new Date().toISOString()},null,2));
+        zip.file("manifest.json",JSON.stringify({"tool":"YT Fr4m3 R1pp3r","version":"5.0","author":"H3l!0s_T3k","browser":navigator.userAgent,"date":new Date().toISOString()},null,2));
         const t=document.querySelector('h1.ytd-video-primary-info-renderer')?document.querySelector('h1.ytd-video-primary-info-renderer').innerText:"Unknown";
-        rF.file("report.json",JSON.stringify({"youtube_url":window.location.href,"video_title":t.replace(/[^\x20-\x7E]/g,''),"duration":formatTime(v.duration),"frames_extracted":frameCount,"skipped":skippedFrames,"resolution":`${v.videoWidth}x${v.videoHeight}`,"format":ext.toUpperCase(),"quality":`${Math.round(settings.quality*100)}%`,"engine":('requestVideoFrameCallback' in HTMLVideoElement.prototype)?"rVFC":"Fallback","userAgent":navigator.userAgent,"interval":settings.interval,"start":captureStartTime.toISOString(),"end":new Date().toISOString()},null,2));
+        rF.file("report.json",JSON.stringify({"youtube_url":window.location.href,"video_title":t.replace(/[^\x20-\x7E]/g,''),"duration":formatTime(v.duration),"frames_extracted":frameCount,"resolution":`${v.videoWidth}x${v.videoHeight}`,"format":ext.toUpperCase(),"quality":`${Math.round(settings.quality*100)}%`,"engine":('requestVideoFrameCallback' in HTMLVideoElement.prototype)?"rVFC":"Fallback","userAgent":navigator.userAgent,"interval":settings.interval,"start":captureStartTime.toISOString(),"end":new Date().toISOString()},null,2));
         let csv="frame,time,size_bytes\n";framesData.forEach(f=>{csv+=`${f.frame},${f.time},${f.size_bytes}\n`;});rF.file("frames_data.csv",csv);sheetBlobs.forEach(s=>sF.file(s.name,s.blob));
         if(zipProgressBar)zipProgressBar.parentElement.style.display='block';if(statusTxt)statusTxt.innerText='[ Zipping... ]';
         try{const c=await zip.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:6}},(m)=>{if(zipProgressBar)zipProgressBar.style.width=`${m.percent.toFixed(0)}%`;if(statusTxt)statusTxt.innerText=`[ Zipping: ${m.percent.toFixed(0)}% ]`;});const l=document.createElement("a");l.href=URL.createObjectURL(c);l.download="Analysis_Frames.zip";document.body.appendChild(l);l.click();document.body.removeChild(l);URL.revokeObjectURL(l.href);if(statusTxt)statusTxt.innerText=`[ Done: ${frameCount} | ${formatBytes(c.size)} ]`;zip=null;framesFolder=null;frameCount=0;totalBytes=0;framesData=[];sheetBlobs=[];if(captureProgressBar)captureProgressBar.style.width='0%';if(zipProgressBar){zipProgressBar.style.width='0%';zipProgressBar.parentElement.style.display='none';}}catch(e){if(statusTxt)statusTxt.innerText='[ ZIP Error! ]';console.error(e);}
@@ -153,25 +165,21 @@
         const titleWrap = document.createElement('div');
         titleWrap.style.cssText = 'display:flex;align-items:center;gap:8px;';
 
-        // FIX: Replaced innerHTML SVG with safe text Emoji to bypass Trusted Types
         const icon = document.createElement('span');
-        icon.innerText = '🎥';
-        icon.style.fontSize = '18px';
+        icon.innerText = '🎥'; icon.style.fontSize = '18px';
 
         const titleText = document.createElement('span');
         titleText.style.cssText = 'font-weight:bold;font-size:14px;color:#fff;';
-        titleText.innerText = 'Fr4m3 R1pp3r v6';
+        titleText.innerText = 'Fr4m3 R1pp3r v5';
 
-        titleWrap.appendChild(icon);
-        titleWrap.appendChild(titleText);
+        titleWrap.appendChild(icon); titleWrap.appendChild(titleText);
 
         collapseBtn = document.createElement('div');
         collapseBtn.innerText = '[-]';
         collapseBtn.style.cssText = 'cursor:pointer;color:#888;font-size:12px;';
         collapseBtn.onclick = () => { const h=uiBody.style.display==='none'; uiBody.style.display=h?'flex':'none'; collapseBtn.innerText=h?'[-]':'[+]'; };
 
-        header.appendChild(titleWrap);
-        header.appendChild(collapseBtn);
+        header.appendChild(titleWrap); header.appendChild(collapseBtn);
         uiContainer.appendChild(header);
 
         uiBody = document.createElement('div');
@@ -201,7 +209,6 @@
         const mS = (l,el) => { const r=document.createElement('div'); r.style.cssText='margin:4px 0;display:flex;justify-content:space-between;align-items:center;font-size:11px;'; const s=document.createElement('span'); s.innerText=l; r.appendChild(s); r.appendChild(el); return r; };
         const bSS = 'background:#1a1a1a;color:white;border:1px solid #444;border-radius:3px;padding:3px;font-size:11px;width:100px;';
 
-        // FIX: Replaced innerHTML options with safe add() method
         intervalSelect = document.createElement('select'); intervalSelect.style.cssText = bSS;
         intervalSelect.add(new Option("0.25s", "0.25", false, settings.interval===0.25));
         intervalSelect.add(new Option("0.5s", "0.5", false, settings.interval===0.5));
@@ -246,7 +253,7 @@
             manualBtn.disabled = true; manualBtn.style.opacity = '0.5';
         } else {
             statusTxt.style.color = '#0f0';
-            statusTxt.innerText = '[ Analysis Ready ]';
+            statusTxt.innerText = '[ 100% Capture Mode ]';
         }
 
         uiBody.appendChild(statusTxt);
@@ -261,10 +268,10 @@
     }
 
     function handleNavigation() {
-        if(captureState!=='idle')setCaptureState('idle');zip=null;framesFolder=null;framesData=[];sheetBlobs=[];frameCount=0;totalBytes=0;skippedFrames=0;captureStartTime=null;
+        if(captureState!=='idle')setCaptureState('idle');zip=null;framesFolder=null;framesData=[];sheetBlobs=[];frameCount=0;totalBytes=0;captureStartTime=null;
         if(statsTxt)statsTxt.innerText=`Res: -- | FPS: --\n00:00:00 / 00:00:00 | Captured: 0\nCache: 0 KB / ${settings.maxRamMB} MB`;
         if(captureProgressBar)captureProgressBar.style.width='0%';if(zipProgressBar){zipProgressBar.style.width='0%';zipProgressBar.parentElement.style.display='none';}
-        if(statusTxt && isZipAvailable) statusTxt.innerText='[ Analysis Ready ]';
+        if(statusTxt && isZipAvailable) statusTxt.innerText='[ 100% Capture Mode ]';
     }
 
     if(document.body) { initUI(); document.addEventListener('yt-navigate-finish', handleNavigation); }
