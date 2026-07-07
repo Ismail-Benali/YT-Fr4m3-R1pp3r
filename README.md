@@ -1,6 +1,6 @@
 <div align="center">
 
-<img width="220" src="https://github.com/user-attachments/assets/7266c0fa-04a4-41cc-933b-b69707ac4f71" alt="YT Fr4m3 R1pp3r Logo">
+<img width="220" src="https://github.com/user-attachments/assets/7266c0fa-04a4-41cc-933b-b69707ac4f71" alt="YT Fr4m3 R1pp3r Logo - High-precision YouTube video frame extractor tool for OSINT, Digital Forensics, and Video Analysis">
 
 # 🎬 YT Fr4m3 R1pp3r
 
@@ -9,7 +9,6 @@
 A lightweight browser userscript for extracting high-quality frames from YouTube videos with configurable capture intervals, metadata generation, contact sheets, and compressed forensic-ready exports.
 
 <p align="center">
-
 <a href="https://github.com/Ismail-Benali/YT-Fr4m3-R1pp3r">
     <img src="https://img.shields.io/github/stars/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge" alt="GitHub Stars">
 </a>
