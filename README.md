@@ -10,19 +10,45 @@ A lightweight browser userscript for extracting high-quality frames from YouTube
 
 <p align="center">
 
-<img src="https://img.shields.io/github/stars/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge">
-<img src="https://img.shields.io/github/forks/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge">
-<img src="https://img.shields.io/github/issues/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge">
-<img src="https://img.shields.io/github/license/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge">
+<a href="https://github.com/Ismail-Benali/YT-Fr4m3-R1pp3r">
+    <img src="https://img.shields.io/github/stars/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge" alt="GitHub Stars">
+</a>
+
+<a href="https://github.com/Ismail-Benali/YT-Fr4m3-R1pp3r/network/members">
+    <img src="https://img.shields.io/github/forks/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge" alt="GitHub Forks">
+</a>
+
+<a href="https://github.com/Ismail-Benali/YT-Fr4m3-R1pp3r/issues">
+    <img src="https://img.shields.io/github/issues/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge" alt="GitHub Issues">
+</a>
+
+<a href="https://github.com/Ismail-Benali/YT-Fr4m3-R1pp3r/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge" alt="MIT License">
+</a>
 
 </p>
 
 <p align="center">
 
-<img src="https://img.shields.io/badge/Version-v5.0-red?style=for-the-badge">
-<img src="https://img.shields.io/badge/JavaScript-ES6-yellow?style=for-the-badge&logo=javascript">
-<img src="https://img.shields.io/badge/Tampermonkey-Compatible-green?style=for-the-badge">
-<img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge">
+<img src="https://img.shields.io/badge/Version-v6.1-red?style=for-the-badge" alt="Version">
+
+<img src="https://img.shields.io/badge/JavaScript-ES6-yellow?style=for-the-badge&logo=javascript" alt="JavaScript">
+
+<img src="https://img.shields.io/badge/Tampermonkey-Compatible-green?style=for-the-badge" alt="Tampermonkey">
+
+<img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge" alt="Status">
+
+</p>
+
+<p align="center">
+
+<a href="https://greasyfork.org/en/scripts/585984-yt-fr4m3-r1pp3r-by-h3l-0s-t3k?locale_override=1">
+    <img src="https://img.shields.io/badge/Install-GreasyFork-800000?style=for-the-badge&logo=greasyfork&logoColor=white" alt="Install from Greasy Fork">
+</a>
+
+<a href="https://github.com/Ismail-Benali/YT-Fr4m3-R1pp3r">
+    <img src="https://img.shields.io/badge/View-GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Repository">
+</a>
 
 </p>
 
