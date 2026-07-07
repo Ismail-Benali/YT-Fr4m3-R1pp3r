@@ -4,42 +4,25 @@
 
 # 🎬 YT Fr4m3 R1pp3r
 
-### High-Precision YouTube Frame Extractor & Video Analysis Tool
+### High-Precision YouTube Frame Extraction & Video Analysis Toolkit
+
+A lightweight browser userscript for extracting high-quality frames from YouTube videos with configurable capture intervals, metadata generation, contact sheets, and compressed forensic-ready exports.
 
 <p align="center">
 
-<a href="https://github.com/Ismail-Benali/YT-Fr4m3-R1pp3r">
-    <img src="https://img.shields.io/github/stars/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge">
-</a>
-
-<a href="https://github.com/Ismail-Benali/YT-Fr4m3-R1pp3r/network/members">
-    <img src="https://img.shields.io/github/forks/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge">
-</a>
-
-<a href="https://github.com/Ismail-Benali/YT-Fr4m3-R1pp3r/issues">
-    <img src="https://img.shields.io/github/issues/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge">
-</a>
+<img src="https://img.shields.io/github/stars/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge">
+<img src="https://img.shields.io/github/forks/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge">
+<img src="https://img.shields.io/github/issues/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge">
+<img src="https://img.shields.io/github/license/Ismail-Benali/YT-Fr4m3-R1pp3r?style=for-the-badge">
 
 </p>
 
 <p align="center">
 
-<img src="https://img.shields.io/badge/Version-v3.0-red?style=for-the-badge">
+<img src="https://img.shields.io/badge/Version-v5.0-red?style=for-the-badge">
 <img src="https://img.shields.io/badge/JavaScript-ES6-yellow?style=for-the-badge&logo=javascript">
 <img src="https://img.shields.io/badge/Tampermonkey-Compatible-green?style=for-the-badge">
-<img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge">
-
-</p>
-
-<p align="center">
-
-<a href="https://greasyfork.org/scripts/XXXXXXXX">
-<img src="https://img.shields.io/badge/Install-GreasyFork-800000?style=for-the-badge" alt="Greasy Fork">
-</a>
-
-<a href="https://openuserjs.org/scripts/H3l!0s_T3k/YT_Fr4m3_R1pp3r">
-<img src="https://img.shields.io/badge/Install-OpenUserJS-4B8BBE?style=for-the-badge" alt="OpenUserJS">
-</a>
+<img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge">
 
 </p>
 
@@ -47,186 +30,274 @@
 
 ---
 
-# 📖 Overview
+# Overview
 
-**YT Fr4m3 R1pp3r** is a lightweight browser userscript designed for high-precision frame extraction and visual video analysis.
+**YT Fr4m3 R1pp3r** is a browser userscript that extracts video frames directly from the HTML5 video element used by YouTube.
 
-The script captures video frames at configurable intervals (default **0.5 seconds**) and automatically exports them into a compressed ZIP archive.
+Designed for researchers, educators, analysts and developers, it provides configurable frame extraction, metadata generation, contact sheets and compressed ZIP exports while remaining lightweight and easy to use.
 
-It is intended for:
-
-- Digital investigations
-- Video inspection
-- Visual documentation
-- Timeline reconstruction
-- Educational demonstrations
-- Research workflows
-- General frame-by-frame analysis
+Unlike traditional screenshot tools, every frame is automatically organized with chronological filenames and exported together with analysis reports.
 
 ---
 
-# ✨ Features
+# Features
 
-- 📷 High-quality frame extraction
-- ⏱ Automatic capture every 0.5 seconds
-- 📸 Manual frame capture
-- 📦 ZIP export
-- 🖼 Automatic Contact Sheet generation
-- ⚡ requestVideoFrameCallback support
-- 🔄 Automatic browser fallback
-- 💾 Memory optimized Blob processing
-- 🗜 DEFLATE ZIP compression
-- 📊 Live statistics panel
-- 🎚 Adjustable JPEG quality
-- 🎥 Resolution detection
-- 🎬 FPS estimation
-- 📈 Estimated output size
-- 🚦 Video error detection
-- 🔄 YouTube SPA navigation support
+## Frame Extraction
+
+- High-quality frame extraction
+- Automatic capture interval
+- Manual frame capture
+- JPEG / PNG / WebP support
+- Adjustable image quality
+- Configurable capture interval
+- Automatic duplicate frame filtering
 
 ---
 
-# 🖥 Interface
+## Analysis
 
-The floating control panel provides:
-
-- ▶ Start Auto Capture
-- ■ Stop & Export ZIP
-- 📷 Capture Current Frame
-- 🎚 JPEG Quality Selector
-- 📊 Resolution Monitor
-- 🎬 FPS Monitor
-- 📈 Captured Frames Counter
-- 💾 Estimated Output Size
-- ✅ Status Indicator
+- Resolution detection
+- Live FPS estimation
+- Progress indicator
+- Estimated output size
+- Capture statistics
+- Capture timestamps
+- Automatic frame numbering
 
 ---
 
-# 📁 ZIP Structure
+## Export
 
-```text
-OSINT_Frames.zip
+- ZIP archive generation
+- Contact Sheet generation
+- JSON metadata report
+- CSV frame report
+- Chronological filenames
+- DEFLATE compression
+
+---
+
+## Performance
+
+- requestVideoFrameCallback support
+- Automatic browser fallback
+- Blob-based processing
+- Canvas reuse
+- Reduced memory usage
+- Automatic cleanup
+- Configurable RAM limit
+- Automatic ZIP generation when memory limit is reached
+
+---
+
+## YouTube Compatibility
+
+- SPA navigation support
+- Video error detection
+- Network stall detection
+- HTML5 video support
+
+---
+
+# User Interface
+
+The floating control panel includes:
+
+- ▶ Start Capture
+- ■ Stop & Export
+- 📷 Manual Capture
+- ⚙ Settings Panel
+
+Settings include:
+
+- Capture Interval
+- Output Format
+- Image Quality
+- Maximum RAM Usage
+
+Real-time statistics display:
+
+- Resolution
+- FPS
+- Current Timestamp
+- Total Frames
+- Skipped Frames
+- Estimated Memory Usage
+- Progress Bar
+
+---
+
+# Output Structure
+
+```
+Analysis_Frames.zip
 │
 ├── Contact_Sheet.jpg
+├── report.json
+├── frames_data.csv
 │
 └── OSINT_Frames/
-    ├── frame_0000_50.jpg
-    ├── frame_0001_00.jpg
-    ├── frame_0001_50.jpg
-    ├── frame_0002_00.jpg
-    ├── frame_0002_50.jpg
+    ├── 000001_000421_012.500.jpg
+    ├── 000002_000421_013.000.jpg
+    ├── 000003_000421_013.500.jpg
     └── ...
 ```
 
 ---
 
-# ⚙ Technologies
+# Generated Reports
+
+## report.json
+
+Contains
+
+- Tool version
+- Capture timestamps
+- Video duration
+- Resolution
+- Image format
+- Compression quality
+- Capture interval
+- Total extracted frames
+- Skipped duplicate frames
+
+---
+
+## frames_data.csv
+
+Each extracted frame includes
+
+| Field | Description |
+|-------|-------------|
+| Frame | Filename |
+| Time | Video timestamp |
+| Size | File size |
+
+---
+
+# Installation
+
+## Tampermonkey
+
+1. Install Tampermonkey
+2. Create a new Userscript
+3. Paste the script
+4. Save
+5. Open any YouTube video
+6. Start capturing
+
+---
+
+# Technologies
 
 - JavaScript ES6
-- HTML5 Canvas API
+- HTML5 Canvas
 - JSZip
 - Blob API
-- File API
-- requestVideoFrameCallback
 - HTMLVideoElement
+- requestVideoFrameCallback
+- LocalStorage
 - Tampermonkey
 
 ---
 
-# 🚀 Installation
+# Performance Optimizations
 
-1. Install **Tampermonkey**
-2. Create a new Userscript
-3. Copy the script source
-4. Save the Userscript
-5. Open a supported video page
-6. Press **Start Auto Capture**
+Version 5 introduces several improvements:
 
----
-
-# ⚡ Performance Optimizations
-
-The current version includes numerous optimizations:
-
-- ✅ Reusable Canvas
-- ✅ Blob-based image processing
-- ✅ Reduced memory consumption
-- ✅ Asynchronous frame encoding
-- ✅ Automatic cleanup
-- ✅ Browser compatibility fallback
-- ✅ DEFLATE ZIP compression
-- ✅ Navigation handling
-- ✅ Pending Blob synchronization
-- ✅ Contact Sheet generation
+- Fast pixel hash duplicate detection
+- Moving average FPS calculation
+- Direct contact sheet rendering
+- Zero-copy canvas workflow
+- Configurable memory limit
+- Automatic export protection
+- Reduced Blob allocations
+- Persistent user settings
+- Improved asynchronous processing
 
 ---
 
-# 📊 Output
+# Example Filename
 
-Each extracted frame is automatically named using its timestamp.
-
-Example:
-
-```text
-frame_0000_50.jpg
-frame_0001_00.jpg
-frame_0001_50.jpg
-frame_0002_00.jpg
+```
+000183_000421_092.500.jpg
 ```
 
-This makes chronological analysis simple and intuitive.
+Meaning
+
+```
+Frame Number : 183
+Video Length : 00:04:21
+Timestamp    : 92.500 sec
+```
 
 ---
 
-# 📌 Use Cases
+# Supported Formats
+
+| Format | Supported |
+|---------|-----------|
+| JPEG | ✔ |
+| PNG | ✔ |
+| WebP | ✔ |
+
+---
+
+# Typical Use Cases
 
 - Frame-by-frame inspection
+- Video documentation
+- Research projects
 - Educational demonstrations
-- Research documentation
-- Digital media analysis
-- Timeline reconstruction
-- Visual investigations
-- Content review
 - Scene comparison
+- Timeline reconstruction
+- Media review
+- Software testing
+- Computer vision dataset preparation
 
 ---
 
-# 🛣 Roadmap
+# Roadmap
 
-- [ ] PNG Export
-- [ ] CSV Report
-- [ ] JSON Metadata
-- [ ] OCR Support
+- [ ] OCR Integration
 - [ ] Face Detection
 - [ ] Object Detection
-- [ ] Duplicate Frame Filtering
-- [ ] Adjustable Capture Interval
-- [ ] Dark / Light Theme
-- [ ] Batch Processing
-- [ ] Video Metadata Export
-- [ ] AI Image Classification
+- [ ] Scene Change Detection
+- [ ] OCR Report
+- [ ] AI Classification
+- [ ] Video Metadata Reader
+- [ ] Batch Video Processing
+- [ ] Dark Theme
+- [ ] Localization
 
 ---
 
-# 📥 Downloads
+# License
 
-| Platform | Download |
-|-----------|----------|
-| 🛢 **Greasy Fork** | **https://greasyfork.org/scripts/XXXXXXXX** |
-| 🟦 **OpenUserJS** | **https://openuserjs.org/scripts/H3l!0s_T3k/YT_Fr4m3_R1pp3r** |
+This project is released under the MIT License.
 
 ---
 
-# ⭐ Support
+# Contributing
 
-If you enjoy this project, consider giving it a **⭐ Star** on GitHub.
+Contributions, ideas and pull requests are welcome.
 
-Contributions, suggestions, and bug reports are always welcome.
+If you discover a bug or have a feature request, please open an issue.
+
+---
+
+# Disclaimer
+
+This tool captures frames from videos rendered in your own browser.
+
+Users are responsible for complying with applicable copyright laws, platform terms of service, and any other legal or contractual obligations when using this software.
 
 ---
 
 <div align="center">
 
-Made with ❤️ by **H3l!0s_T3k**
+## ⭐ If you find this project useful, consider leaving a Star.
+
+Made by **H3l!0s_T3k**
 
 </div>
