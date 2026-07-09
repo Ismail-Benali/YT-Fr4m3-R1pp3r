@@ -24,7 +24,7 @@
 // @description:de  Hochpräziser YouTube-Frame-Extraktor für Videoanalyse, digitale Forensik und Medienuntersuchung.
 //
 // @namespace    http://tampermonkey.net/
-// @version      5.0
+// @version      5.1
 // @author       H3l!0s_T3k
 // @homepageURL  https://github.com/Ismail-Benali
 // @match        *://*.youtube.com/*
@@ -35,12 +35,14 @@
 
 (function() {
     'use strict';
+    if (window.__ytFr4m3R1pp3rInit) return;
+    window.__ytFr4m3R1pp3rInit = true;
 
     const isZipAvailable = typeof JSZip !== 'undefined';
 
     let settings;
     try { const s = localStorage.getItem('ripperSettings'); settings = s ? JSON.parse(s) : null; } catch(e) { settings = null; }
-    if (!settings) settings = { quality: 0.85, format: 'image/jpeg', interval: 0.5, maxRamMB: 1500 };
+    if (!settings) settings = { quality: 0.85, format: 'image/jpeg', interval: 0.5, maxRamMB: 1500, panelPos: null };
     function saveSettings() { try { localStorage.setItem('ripperSettings', JSON.stringify(settings)); } catch(e){} }
 
     let captureState = 'idle', captureCallbackId = null, fallbackInterval = null, lastCaptureTime = -1;
@@ -144,7 +146,7 @@
         if(frameCount===0&&captureState==='idle'){if(statusTxt)statusTxt.innerText='[ No Frames ]';return;}
         if(statusTxt)statusTxt.innerText='[ Finalizing... ]';setCaptureState('idle');await waitForPendingBlobs();if(imgInSheet>0)await saveCurrentSheet();
         if(statusTxt)statusTxt.innerText='[ Structuring... ]';const v=getVideo(),ext=getExt(),rF=zip.folder("Reports"),sF=zip.folder("ContactSheets");
-        zip.file("manifest.json",JSON.stringify({"tool":"YT Fr4m3 R1pp3r","version":"5.0","author":"H3l!0s_T3k","browser":navigator.userAgent,"date":new Date().toISOString()},null,2));
+        zip.file("manifest.json",JSON.stringify({"tool":"YT Fr4m3 R1pp3r","version":"5.1","author":"H3l!0s_T3k","browser":navigator.userAgent,"date":new Date().toISOString()},null,2));
         const t=document.querySelector('h1.ytd-video-primary-info-renderer')?document.querySelector('h1.ytd-video-primary-info-renderer').innerText:"Unknown";
         rF.file("report.json",JSON.stringify({"youtube_url":window.location.href,"video_title":t.replace(/[^\x20-\x7E]/g,''),"duration":formatTime(v.duration),"frames_extracted":frameCount,"resolution":`${v.videoWidth}x${v.videoHeight}`,"format":ext.toUpperCase(),"quality":`${Math.round(settings.quality*100)}%`,"engine":('requestVideoFrameCallback' in HTMLVideoElement.prototype)?"rVFC":"Fallback","userAgent":navigator.userAgent,"interval":settings.interval,"start":captureStartTime.toISOString(),"end":new Date().toISOString()},null,2));
         let csv="frame,time,size_bytes\n";framesData.forEach(f=>{csv+=`${f.frame},${f.time},${f.size_bytes}\n`;});rF.file("frames_data.csv",csv);sheetBlobs.forEach(s=>sF.file(s.name,s.blob));
@@ -157,10 +159,19 @@
 
         uiContainer = document.createElement('div');
         uiContainer.id = 'yt-frame-extractor-ui';
-        uiContainer.style.cssText = 'position:fixed;top:80px;right:20px;z-index:999999;display:flex;flex-direction:column;gap:6px;background:rgba(15,15,15,0.95);padding:12px;border-radius:8px;border:1px solid #333;min-width:280px;color:#ddd;box-shadow:0 4px 15px rgba(0,0,0,0.5);font-family:Segoe UI,system-ui,sans-serif;';
+        uiContainer.style.cssText = 'position:fixed;z-index:999999;display:flex;flex-direction:column;gap:6px;background:rgba(15,15,15,0.95);padding:12px;border-radius:8px;border:1px solid #333;min-width:280px;color:#ddd;box-shadow:0 4px 15px rgba(0,0,0,0.5);font-family:Segoe UI,system-ui,sans-serif;';
+        if (settings.panelPos) {
+            uiContainer.style.left = settings.panelPos.x + 'px';
+            uiContainer.style.top = settings.panelPos.y + 'px';
+            uiContainer.style.right = 'auto';
+        } else {
+            uiContainer.style.top = '80px';
+            uiContainer.style.right = '20px';
+        }
 
         const header = document.createElement('div');
-        header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;border-bottom:1px solid #333;padding-bottom:6px;';
+        header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;border-bottom:1px solid #333;padding-bottom:6px;cursor:grab;user-select:none;';
+        header.title = 'اسحب لنقل اللوحة';
 
         const titleWrap = document.createElement('div');
         titleWrap.style.cssText = 'display:flex;align-items:center;gap:8px;';
@@ -170,7 +181,7 @@
 
         const titleText = document.createElement('span');
         titleText.style.cssText = 'font-weight:bold;font-size:14px;color:#fff;';
-        titleText.innerText = 'Fr4m3 R1pp3r v5';
+        titleText.innerText = 'YTFR 5.1';
 
         titleWrap.appendChild(icon); titleWrap.appendChild(titleText);
 
@@ -181,6 +192,61 @@
 
         header.appendChild(titleWrap); header.appendChild(collapseBtn);
         uiContainer.appendChild(header);
+
+        // Drag functionality
+        let isDragging = false, dragOffX = 0, dragOffY = 0;
+        header.addEventListener('mousedown', (e) => {
+            if (e.target === collapseBtn) return;
+            isDragging = true;
+            header.style.cursor = 'grabbing';
+            const rect = uiContainer.getBoundingClientRect();
+            dragOffX = e.clientX - rect.left;
+            dragOffY = e.clientY - rect.top;
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            let nx = e.clientX - dragOffX;
+            let ny = e.clientY - dragOffY;
+            nx = Math.max(0, Math.min(nx, window.innerWidth - uiContainer.offsetWidth));
+            ny = Math.max(0, Math.min(ny, window.innerHeight - uiContainer.offsetHeight));
+            uiContainer.style.left = nx + 'px';
+            uiContainer.style.top = ny + 'px';
+            uiContainer.style.right = 'auto';
+        });
+        document.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            header.style.cursor = 'grab';
+            settings.panelPos = { x: parseInt(uiContainer.style.left), y: parseInt(uiContainer.style.top) };
+            saveSettings();
+        });
+        // Touch support
+        header.addEventListener('touchstart', (e) => {
+            if (e.target === collapseBtn) return;
+            isDragging = true;
+            const t = e.touches[0];
+            const rect = uiContainer.getBoundingClientRect();
+            dragOffX = t.clientX - rect.left;
+            dragOffY = t.clientY - rect.top;
+        }, { passive: true });
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const t = e.touches[0];
+            let nx = t.clientX - dragOffX;
+            let ny = t.clientY - dragOffY;
+            nx = Math.max(0, Math.min(nx, window.innerWidth - uiContainer.offsetWidth));
+            ny = Math.max(0, Math.min(ny, window.innerHeight - uiContainer.offsetHeight));
+            uiContainer.style.left = nx + 'px';
+            uiContainer.style.top = ny + 'px';
+            uiContainer.style.right = 'auto';
+        }, { passive: true });
+        document.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            settings.panelPos = { x: parseInt(uiContainer.style.left), y: parseInt(uiContainer.style.top) };
+            saveSettings();
+        });
 
         uiBody = document.createElement('div');
         uiBody.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
